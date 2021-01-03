@@ -1,12 +1,25 @@
 
+"""Learning how the fitbit web apis work.  They are documented
+    https://dev.fitbit.com/build/reference/web-api/
+
+    :raises Exception: [description]
+    :raises Exception: [description]
+    :raises Exception: [description]
+    :return: [description]
+    :rtype: [type]
+    """
 from dateutil import parser
+import json
 import requests
 import pandas as pd
-import matplotlib.pyplot as plt
 
-my_access_token = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkJaS1YiLCJzdWIiOiIyM1ZCNTYiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJyc29jIHJzZXQgcmFjdCBybG9jIHJ3ZWkgcmhyIHJwcm8gcm51dCByc2xlIiwiZXhwIjoxNjEwMDIyMjEwLCJpYXQiOjE2MDk0MTc0MTB9.m_vEY9pK3aVzC6cZ4353JtC23sGdzcG6FKWQ9DHpwaI"
 
-father_access_token = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkJaR00iLCJzdWIiOiIyNEtCM1MiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJyc29jIHJhY3QgcnNldCBybG9jIHJ3ZWkgcmhyIHJudXQgcnBybyByc2xlIiwiZXhwIjoxNjEwMTQ5MTQ1LCJpYXQiOjE2MDk1NDQzNDV9.Gx6YJgJyNcyW12YimdAjw1ibs7djXrWPLy3efwBzwzA"
+# I am using implicit oauth2 access.
+# see https://dev.fitbit.com/build/reference/web-api/oauth2/
+# for fitbit's doc on the different oauth2 access grant flows.
+
+
+# TODO: Unclear how these apis should be factored out.
 
 
 def get_date_from_user():
@@ -38,9 +51,13 @@ def get_data(date_str, activity='heart', detail_level='1sec'):
     if date_str is None:
         raise Exception(
             "The function requires a date string in the format YYYY-MM-DD.")
+    # TODO: The location and actually getting the access token should be more robust.
+    with open('config.json') as f:
+        secret_dict = json.load(f)
+    access_token = secret_dict['ACCESS_TOKEN']
     heart_rates_url = "https://api.fitbit.com/1/user/-/activities/" + \
         activity+"/date/" + date_str+"/1d/" + detail_level + ".json"
-    header = {'Authorization': 'Bearer {}'.format(father_access_token)}
+    header = {'Authorization': 'Bearer {}'.format(access_token)}
     response = requests.get(heart_rates_url, headers=header).json()
     # If the request was successful, there should be an KeyError exception when asking for the errors list.
     try:
